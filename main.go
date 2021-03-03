@@ -1,3 +1,6 @@
+/*
+	This is command line tool for converting image file.
+*/
 package main
 
 import (
