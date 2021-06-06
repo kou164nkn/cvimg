@@ -1,4 +1,4 @@
-package main
+package cvimg
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func searchAndConvert(dir, src, dst string) {
+func SearchAndConvert(dir, src, dst string) {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Ext(path) == "."+src {
 			convertImg(path, src, dst)

@@ -8,6 +8,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+  "github.com/kou164nkn/cvimg"
 )
 
 var (
@@ -27,7 +29,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	searchAndConvert(*dir, *src, *dst)
+	cvimg.SearchAndConvert(*dir, *src, *dst)
 }
 
 func validArgs(dir, src, dst string) []error {
