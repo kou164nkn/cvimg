@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"os"
 
-  "github.com/kou164nkn/cvimg"
+	"github.com/kou164nkn/cvimg"
 )
 
 var (
@@ -19,10 +19,34 @@ var (
 	imgFormat = [...]string{"jpg", "jpeg", "png", "gif"}
 )
 
+// consider testability for getting FileInfo
+type Dir interface {
+	Stat(string) (os.FileInfo, error)
+}
+
+type DirFunc func() (os.FileInfo, error)
+
+func (f DirFunc) Stat(dir string) (os.FileInfo, error) {
+	return f()
+}
+
+type Cvimg struct {
+	Dir Dir
+}
+
+func (c Cvimg) stat(dir string) (os.FileInfo, error) {
+	if c.Dir == nil {
+		return os.Stat(dir)
+	}
+	return c.Dir.Stat(dir)
+}
+
 func main() {
 	flag.Parse()
 
-	if errs := validArgs(*dir, *src, *dst); len(errs) > 0 {
+	var c Cvimg
+
+	if errs := ValidArgs(c, *dir, *src, *dst); len(errs) > 0 {
 		for _, err := range errs {
 			fmt.Fprintln(os.Stderr, err)
 		}
@@ -32,19 +56,19 @@ func main() {
 	cvimg.SearchAndConvert(*dir, *src, *dst)
 }
 
-func validArgs(dir, src, dst string) []error {
-	var errs []error
+func ValidArgs(c Cvimg, dir, src, dst string) [3]error {
+	var errs [3]error
 
-	if f, err := os.Stat(dir); err != nil || !f.IsDir() {
-		errs = append(errs, errors.New(dir+": You specified non existing directory"))
+	if f, err := c.stat(dir); err != nil || !f.IsDir() {
+		errs[0] = errors.New(dir + ": You specified non existing directory")
 	}
 
 	if err := validFormat(src); err != nil {
-		errs = append(errs, err)
+		errs[1] = err
 	}
 
 	if err := validFormat(dst); err != nil {
-		errs = append(errs, err)
+		errs[2] = err
 	}
 
 	return errs
