@@ -1,7 +1,6 @@
 package cvimg
 
 import (
-	"fmt"
 	"image"
 	"image/gif"
 	"image/jpeg"
@@ -11,24 +10,27 @@ import (
 	"strings"
 )
 
-func SearchAndConvert(dir, src, dst string) {
+func SearchAndConvert(dir, src, dst string) error {
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if filepath.Ext(path) == "."+src {
-			convertImg(path, src, dst)
+			err := convertImg(path, src, dst)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
 
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		return err
 	}
+	return nil
 }
 
-func convertImg(path, src, dst string) {
+func convertImg(path, src, dst string) error {
 	file, err := os.Open(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
+		return err
 	}
 	defer file.Close()
 
@@ -38,20 +40,17 @@ func convertImg(path, src, dst string) {
 	case "jpg", "jpeg":
 		image, err = jpeg.Decode(file)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	case "png":
 		image, err = png.Decode(file)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	case "gif":
 		image, err = gif.Decode(file)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	default:
 	}
@@ -61,29 +60,25 @@ func convertImg(path, src, dst string) {
 
 	dstFile, err := os.Create(dstFileName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return
+		return err
 	}
 	defer dstFile.Close()
 
 	switch dst {
 	case "jpg", "jpeg":
 		if err := jpeg.Encode(dstFile, image, nil); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	case "png":
 		if err := png.Encode(dstFile, image); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	case "gif":
 		if err := gif.Encode(dstFile, image, nil); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return
+			return err
 		}
 	default:
 	}
 
-	return
+	return nil
 }

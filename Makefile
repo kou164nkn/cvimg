@@ -1,5 +1,5 @@
 .PHONY: build
-build: deps
+build:
 	go build ./cmd/cvimg
 
 .PHONY: test

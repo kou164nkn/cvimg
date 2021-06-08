@@ -46,14 +46,23 @@ func main() {
 
 	var c Cvimg
 
-	if errs := ValidArgs(c, *dir, *src, *dst); len(errs) > 0 {
-		for _, err := range errs {
+	errs := ValidArgs(c, *dir, *src, *dst)
+
+	var errFlag bool
+	for _, err := range errs {
+		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
+			errFlag = true
 		}
+	}
+	if errFlag {
 		os.Exit(1)
 	}
 
-	cvimg.SearchAndConvert(*dir, *src, *dst)
+	if err := cvimg.SearchAndConvert(*dir, *src, *dst); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 }
 
 func ValidArgs(c Cvimg, dir, src, dst string) [3]error {
