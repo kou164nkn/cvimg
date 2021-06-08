@@ -1,5 +1,7 @@
+.PHONY: build
 build:
-	go build -o cvimg main.go converter.go
+	go build ./cmd/cvimg
 
-run:
-	go run main.go converter.go
+.PHONY: test
+test:
+	go test ./cmd/cvimg
