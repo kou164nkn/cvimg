@@ -10,24 +10,55 @@ import (
 	"strings"
 )
 
-func SearchAndConvert(dir, src, dst string) error {
-	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		if filepath.Ext(path) == "."+src {
-			err := convertImg(path, src, dst)
-			if err != nil {
-				return err
-			}
+var SupportedFormats = []string{"jpg", "jpeg", "png", "gif"}
+
+type Cvimg struct {
+	SrcFormat   string
+	DstFormat   string
+	TargetPaths []string
+}
+
+func (c Cvimg) ValidFormat() bool {
+	var validSrc, validDst bool
+
+	for _, v := range SupportedFormats {
+		if v == c.SrcFormat {
+			validSrc = true
+		}
+		if v == c.DstFormat {
+			validDst = true
+		}
+	}
+
+	return validSrc && validDst
+}
+
+func (c *Cvimg) Search(file string) error {
+	err := filepath.Walk(file, func(path string, info os.FileInfo, err error) error {
+		if filepath.Ext(path) == "."+c.SrcFormat {
+			c.TargetPaths = append(c.TargetPaths, path)
 		}
 		return nil
 	})
-
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func convertImg(path, src, dst string) error {
+func (c Cvimg) Convert() error {
+	for _, path := range c.TargetPaths {
+		err := convertImage(path, c.SrcFormat, c.DstFormat)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func convertImage(path, src, dst string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
