@@ -4,4 +4,4 @@ build:
 
 .PHONY: test
 test:
-	go test ./cmd/cvimg
+	go test -v -race -cover
